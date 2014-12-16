@@ -11,12 +11,22 @@
     "jmc",
     "library",
     "mobile",
-    "component",
-    "scroll"
+    "component"
   ],
   "authors": [
     "sculove"
   ],
   "license": "LGPL v2",
-  "homepage": "http://jindo.dev.naver.com/jindo_home/Mobile.html"
+  "homepage": "https://github.com/sculove/mScroll"
+  "ignore" : [
+    "demo/",
+    "test/",
+    "src",
+    ".gitignore",
+    ".jshintrc",
+    "Gruntfile.js",
+    "bower.json"
+    "package.json",
+    "README.md"
+  ]
 }
