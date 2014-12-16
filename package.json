@@ -1,0 +1,33 @@
+{
+  "name": "mScroll",
+  "version": "0.0.1",
+  "description": "a new and improved module jindo.m.Scroll components of the JMC",
+  "main": "dist/mScroll.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sculove/mScroll.git"
+  },
+  "keywords": [
+    "scroll",
+    "jmc"
+  ],
+  "author": "sculove",
+  "licenses": [
+    {
+      "type": "LGPL v2",
+      "url": "https://www.gnu.org/licenses/old-licenses/lgpl-2.0.html"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/sculove/mScroll/issues"
+  },
+  "homepage": "https://github.com/sculove/mScroll",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-jstools": "^1.1.1"
+  }
+}

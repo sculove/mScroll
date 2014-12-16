@@ -1,0 +1,67 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=0.7, maximum-scale=0.7, minimum-scale=0.7, user-scalable=no, target-densitydpi=medium-dpi">
+<title></title>
+<style>
+* {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+html {
+	-ms-touch-action: none;
+}
+
+body,ul,li {
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+body {
+	font-size: 12px;
+	font-family: ubuntu, helvetica, arial;
+	background: #000;
+}
+
+.wrapper {
+	width:100%;
+	height:100%;
+}
+
+.scroller {
+	height:30000px;
+	position: absolute;
+	/*background-color: red;
+	opacity: 0.1;*/
+	background: url(http://lab.cubiq.org/iscroll5/demos/parallax/stars.jpg);
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+	<div class="scroller">
+	scroller content
+	</div>
+</div>
+<!-- <script src="../../src/base.js"></script>
+<script src="../../src/mComponent.js"></script>
+<script src="../../src/mEffect.js"></script>
+<script src="../../src/mTouch.js"></script>
+<script src="../../src/mScroll.js"></script> -->
+<script src="../../dist/mScroll.js"></script>
+<script>
+var oScroll = new mScroll(".wrapper");
+// .on("beforeScroll" , function(e) {
+// 	console.log("beforeScroll",e );
+// 	// e.stop();
+// })
+// .on("position" , function(e) {
+// 	console.log("position",e );
+// 	// e.stop();
+// });
+</script>
+</body>
+</html>

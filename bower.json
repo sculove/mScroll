@@ -1,0 +1,22 @@
+{
+  "name": "mScroll",
+  "version": "0.0.1",
+  "description": "a new and improved module jindo.m.Scroll components of the JMC",
+  "main": "dist/mScroll.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "scroll",
+    "jmc",
+    "library",
+    "mobile",
+    "component",
+    "scroll"
+  ],
+  "authors": [
+    "sculove"
+  ],
+  "license": "LGPL v2",
+  "homepage": "http://jindo.dev.naver.com/jindo_home/Mobile.html"
+}
