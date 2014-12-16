@@ -17,7 +17,7 @@
     "sculove"
   ],
   "license": "LGPL v2",
-  "homepage": "https://github.com/sculove/mScroll"
+  "homepage": "https://github.com/sculove/mScroll",
   "ignore" : [
     "demo/",
     "test/",
