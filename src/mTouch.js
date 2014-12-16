@@ -17,7 +17,8 @@ function mTouch(el, option) {
 	this._init();
 }
 
-mTouch.prototype = {
+mTouch.prototype = new mComponent();
+_$.extend(mTouch.prototype, {
 	_init : function() {
 		this.info = {
 			"start" : {},
@@ -256,6 +257,4 @@ mTouch.prototype = {
 		this._manageEvent(true);
 		this._resetTouchInfo();
 	}
-};
-
-_$.extend(mTouch.prototype, mComponent.prototype);
+});

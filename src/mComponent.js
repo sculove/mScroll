@@ -1,7 +1,8 @@
-function mComponent() {}
+function mComponent() {
+	this._eventHandler={};
+}
 
 mComponent.prototype = {
-	_eventHandler : {},
 	on : function(type, fn) {
 		var handler = this._eventHandler[type];
 		if (typeof handler == 'undefined'){
@@ -21,7 +22,7 @@ mComponent.prototype = {
 	},
 	trigger : function(type, param) {
 		if(!this.has(type)) return true;
-
+		param = param || {};
 		var fns = this._eventHandler[type].concat();
 		_$.extend(param, {_type:type});	// safari has a type parameter
 

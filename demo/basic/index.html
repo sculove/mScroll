@@ -46,14 +46,30 @@ body {
 	scroller content
 	</div>
 </div>
-<!-- <script src="../../src/base.js"></script>
+<script src="../../src/base.js"></script>
 <script src="../../src/mComponent.js"></script>
 <script src="../../src/mEffect.js"></script>
 <script src="../../src/mTouch.js"></script>
-<script src="../../src/mScroll.js"></script> -->
-<script src="../../dist/mScroll.js"></script>
+<script src="../../src/mScroll.js"></script>
+<!-- <script src="../../dist/mScroll.js"></script> -->
 <script>
 var oScroll = new mScroll(".wrapper");
+// oScroll.on("beforeStart",function(e) {
+// 	console.info(e._type,e);
+// });
+// oScroll.on("start",function(e) {
+// 	console.log(e._type,e);
+// });
+oScroll.on("scrollEnd",function(e) {
+	console.error(e._type);
+});
+// oScroll.on("beforeMove",function(e) {
+// 	console.info(e._type,e);
+// });
+// oScroll.on("move",function(e) {
+// 	console.log(e._type,e);
+// });
+
 // .on("beforeScroll" , function(e) {
 // 	console.log("beforeScroll",e );
 // 	// e.stop();

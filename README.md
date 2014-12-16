@@ -8,14 +8,24 @@ mScroll is a new and improved module [jindo.m.Scroll](http://jindo.dev.naver.com
 You can use it in a variety of environments. (like a jindo, jQuery, ...)  
 mScroll is multi-platform javascript scrolller.    
 
-This project is an unofficial project.  
-No longer have any special requirements, the project will proceed unofficially.
+> This project is an unofficial project.  
+> No longer have any special requirements, the project will proceed unofficially.
 
 ### mScroll Features
 - cross platform and browsing in mobile environment. 
 - fast loading speed and optimal performance
 - separation of markup and code
 - dependency free
+
+## **How to install?**
+```bash
+bower install m-scroll
+```
+
+## **Issues**
+If you find a bug, please report us via the GitHub issues page.  
+https://github.com/sculove/mScroll/issues
+
 
 ## License
 Licensed under LGPL v2:  

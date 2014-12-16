@@ -21,14 +21,15 @@ function mScroll(el, option) {
 	_$.extend(this.option, option);
 
 	// tempory option
-	this.option.useTransition = false;
+	this.option.useTransition = true;
 
 	this.wrapper = typeof el == "string" ? document.querySelector(el) : el;
 	this._init();
 	this.refresh();
 }
 
-mScroll.prototype = {
+mScroll.prototype = new mComponent();
+_$.extend(mScroll.prototype, {
 	_init : function() {
 		// define variable
 		this._timer = {
@@ -38,7 +39,7 @@ mScroll.prototype = {
 			"bugOffset" : -1,
 			"bugHighlight" : -1
 		};
-		this._queue = [];
+		this.isPlaying = false;
 		this._bufferPos = { x : 0, y : 0};
 		this.x = 0;
 		this.y = 0;
@@ -108,6 +109,7 @@ mScroll.prototype = {
 		this.touch[method]("move", this._move.bind(this));
 		this.touch[method]("end", this._end.bind(this));
 
+		// bind updater
 		!this.option.useTransition && (this.updater = (function() {
 			// console.log("updater [", this.x, this.y , "] =>", this._bufferPos);
 			if(this._bufferPos.x != this.x || this._bufferPos.y != this.y) {
@@ -116,16 +118,37 @@ mScroll.prototype = {
 			this._startUpdater();
 		}).bind(this));
 
+		// bind transitionEnd
+		if(this.option.useTransition) {
+			this._transitionEnd = (function(e) {
+				if(e.target != this.scroller || !this.isPlaying ) {
+					return;
+				}
+				this._transitionTime(0);
+				this.isPlaying = false;
+				if ( !this.restore(300) ) {
+					this.trigger("scrollEnd");
+				}
+			}).bind(this);
+
+			method = remove ? "removeEventListener" : "addEventListener";
+			this.scroller[method]("transitionend", this._transitionEnd);
+		}
+
+		// bind offsetbug
 		_$.hasOffsetBug && (this._fixOffsetBugFunc = (function() {
 			if(this.scroller) {
-				this._translateToStyle(this.scroller);
+				var ht = this._scrollerOffset();
+				ht[_$.toPrefixStr("transform")] = _$.version >= 4 ? _$.getTranslate(0,0,this.option.use3d) : null;
+				ht[_$.toPrefixStr("transitionDuration")] = null;
+				_$.extend(this.scrollerStyle, ht);
 				if(parseInt(_$.version,10) <= 3) {
 					this.dummy.focus();
 				}
-				console.error("[todo] android 3.0이하에서 발생하는 offsetBug 처리");
 			}
 		}).bind(this));
 
+		// bind highlightbug
 		_$.hasHighlightBug && (this._fixHighlightFunc = (function() {
 			_$.addClass(this.wrapper, _$.KITKAT_HIGHLIGHT_CLASS);
 		}).bind(this));
@@ -208,13 +231,15 @@ mScroll.prototype = {
 		(!this.useHScroll && !this.useVScroll) && this._fixOffsetBug();
 	},
 
-	_translateToStyle : function(e) {
-		var translateOffset = _$.getTranslateOffset(e);
-		var styleOffset = _$.getStyleOffset(this.scrollerStyle);
-		_$.extend(this.scrollerStyle, {
-			left : (translateOffset.left + styleOffset.left) + "px",
-			top : (styleOffset.left + styleOffset.left) + "px"
-		});
+	_scrollerOffset : function(e) {
+		var translateOffset = _$.getTranslateOffset(this.scroller),
+			styleOffset = _$.hasOffsetBug ? _$.getStyleOffset(this.scrollerStyle) : {left:0,top:0},
+			x = this._boundaryX(translateOffset.left + styleOffset.left),
+			y = this._boundaryY(translateOffset.top + styleOffset.top);
+		return {
+			left : x,
+			top : y
+		};
 	},
 
 	_fixOffsetBug : function() {
@@ -297,9 +322,15 @@ mScroll.prototype = {
 		// console.debug("start",e.moveType, e);
 		//
 		this._clearTimer();
-
-		// stop~!
-		this.isPlaying && this._stopScroll();
+		if(this.trigger("beforeStart",e)) {
+			// stop~!
+			this.isPlaying && this._stopScroll();
+			if(!this.trigger("start",e)) {
+				e.stop();
+			}
+		} else {
+			e.stop();
+		}
 	},
 
 	// touchmove/mousemove
@@ -329,13 +360,11 @@ mScroll.prototype = {
 				nextY = this._boundaryY(this.y + e.vectorY);
 			}
 			this._setPos(nextX, nextY);
-			// if(!this.trigger("move", e)) {
-			// 	e.preventDefault();
-			// 	e.stopPropagation();
-			// }
+			if(!this.trigger("move", e)) {
+				e.stop();
+			}
 		} else {
-			e.preventDefault();
-			e.stopPropagation();
+			e.stop();
 		}
 	},
 
@@ -383,17 +412,21 @@ mScroll.prototype = {
 		});
 	},
 
-	_stopScroll : function() {
-		// if(!this.option("bUseFixedScrollbar")) {
-		// 	this._hideScrollBar("V");
-		// 	this._hideScrollBar("H");
-		// }
-		this._stopUpdater();
-		this._stop();
-		// this._setPos(this._boundaryX(x), this._boundaryY(y)); // in stop
-		// this._isControling = false;
-		// this._fireAfterScroll();
-		this._fixOffsetBug();
+
+	_transitionTime: function (duration) {
+		if(!this.option.useTransition) { return; }
+		duration += 'ms';
+		var durationStr = _$.toPrefixStr("transitionDuration");
+		this.scrollerStyle[durationStr] = duration;
+
+		if(this.option.useScrollbar) {
+			if (this.useHScroll && this.hindicator) {
+				this.hindicator.style[durationStr] = duration;
+			}
+			if (this.useVScroll && this.vindicator) {
+				this.vindicator.style[durationStr] = duration;
+			}
+		}
 	},
 
 	_setScrollbarPos : function(direction, pos) {
@@ -444,18 +477,19 @@ mScroll.prototype = {
 				param.nextY = this.y + nextY.distance;
 			}
 			param.duration = Math.max(Math.max(nextX.duration, nextY.duration),10);
-			console.info(param.y , "=>", param.nextY, "(", param.duration, ")");
+			// console.info(param.y , "=>", param.nextY, "(", param.duration, ")");
 		} else {
 			param.duration = 0;
 		}
 
 		if(this.trigger("beforeScroll", param)) {
 			if(isMomentum) {
-				if(this.option.useBounce) {
-					this.scrollTo(param.nextX, param.nextY, param.duration);
-				} else {
-					this.scrollTo(this._boundaryX(param.nextX), this._boundaryY(param.nextY), param.duration);
+				if(!this.option.useBounce) {
+					param.nextX = param.nextX;
+					param.nextY = param.nextY;
+					param.duration = param.duration;
 				}
+				this.scrollTo(param.nextX, param.nextY, param.duration);
 			} else {
 				// out of range
 				if( ( this.useHScroll &&  ( param.nextX > 0  || param.nextX  < this.maxScrollX)) ||
@@ -473,93 +507,72 @@ mScroll.prototype = {
 			nextY = this._boundaryY(this.y);
 		if(nextX === this.x && nextY == this.y) {
 			// end animation
-			//
-			this.isPlaying = false;
-			// console.error("end Animation");
+			return false;
 		} else {
-			// console.info("restore");
 			this.scrollTo(nextX, nextY, duration);
+			return true;
 		}
 	},
 
-	_stop : function() {
-		// @todo transition
-		if(this.option.useTransition) {
+	_stopScroll : function() {
+		var offset = this._scrollerOffset();
 
+		// if(!this.option("bUseFixedScrollbar")) {
+		// 	this._hideScrollBar("V");
+		// 	this._hideScrollBar("H");
+		// }
+		if(this.option.useTransition) {
+			this._transitionTime(0);
 		} else {
 			cancelAnimationFrame(this._timer["ani"]);
 			this._stopUpdater();
 		}
-
-		this.isPlaying && this._setPos(this.x, this.y);
-		this._queue.length = 0;
+		this._setPos(this._boundaryX(offset.left), this._boundaryY(offset.top));
 		this.isPlaying = false;
 		// @todo isStop?
+		this.trigger("scrollEnd");
+		this._fixOffsetBug();
 	},
 
 	scrollTo : function(x, y, duration) {
 		// console.info("scrollTo : " ,x,y, "(",duration,")");
-		this._stop();
-		this._queue.push({
-			x : this.useHScroll ? x : 0,
-			y : this.useVScroll ? y : 0,
-			duration : duration || 0
-		});
-		this._animate();
-	},
-
-	_animate : function() {
-		var step;
-		if(this.isPlaying) return;
-		if(!this._queue.length) {
-			this.restore(300);
-			return;
-		}
-		do {
-			step = this._queue.shift();
-			if(!step) return;
-		} while(step.x = this.x && step.y == this.y);
-
-		if(step.duration == 0) {
-			// @todo transition
-
-
-
-			this._setPos(step.x, step.y);
-			this._animate();
-			return;
-		}
-
-		var self = this;
-		this.isPlaying = true;
-		if(this.option.useTransition) {
-			// @todo
+		if(!duration) {
+			this._setPos(x, y);
 		} else {
-			this._animationTimer(step);
+			if(this.option.useTransition) {
+				this.isPlaying = true;
+				this._transitionTime(duration);
+				this._setPos(x,y);
+			} else {
+				this._animate(x,y, duration);
+			}
 		}
 	},
 
-	// _animationTransition : function() {
+	_animate : function(x,y, duration) {
+		if(this.isPlaying) return;
+		this.isPlaying = true;
 
-	// },
-
-	_animationTimer : function(step) {
-		var self = this;
-		var startTime = (new Date()).getTime(),
-			fx = this.useHScroll ? this.option.effect(this.x, step.x) : 0,
-			fy = this.useVScroll ? this.option.effect(this.y, step.y) : 0,
+		var self = this,
+			startTime = (new Date()).getTime(),
+			fx = this.useHScroll ? this.option.effect(this.x, x) : 0,
+			fy = this.useVScroll ? this.option.effect(this.y, y) : 0,
 			now;
+
 		this._startUpdater();
 		(function animate () {
 			now = (new Date()).getTime();
-			if (now >= startTime + step.duration) {
+			if (now >= startTime + duration) {
 				self._stopUpdater();
-				self._setPos(step.x, step.y);
+				self._setPos(x, y);
 				self.isPlaying = false;
-				self._animate();
+				if(!self.restore(300)) {
+					console.error("end");
+					self.trigger("scrollEnd");
+				}
 				return;
 			}
-			now = (now - startTime) / step.duration;
+			now = (now - startTime) / duration;
 			self._bufferPos = {
 				x : fx && fx(now),
 				y : fy && fy(now)
@@ -614,6 +627,4 @@ mScroll.prototype = {
 		this._manageEvent(true);
 		this.touch.destroy();
 	}
-};
-
-_$.extend(mScroll.prototype, mComponent.prototype);
+});
