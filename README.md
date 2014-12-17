@@ -18,6 +18,7 @@ mScroll is multi-platform javascript scrolller.
 - dependency free
 
 ## **How to install?**
+To install mScroll as a front-end dependency using Bower, simply execute the following command in your project’s folder:
 ```bash
 bower install m-scroll
 ```

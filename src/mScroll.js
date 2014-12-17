@@ -125,10 +125,7 @@ _$.extend(mScroll.prototype, {
 					return;
 				}
 				this._transitionTime(0);
-				this.isPlaying = false;
-				if ( !this.restore(300) ) {
-					this.trigger("scrollEnd");
-				}
+				this.restore(300);
 			}).bind(this);
 
 			method = remove ? "removeEventListener" : "addEventListener";
@@ -138,7 +135,10 @@ _$.extend(mScroll.prototype, {
 		// bind offsetbug
 		_$.hasOffsetBug && (this._fixOffsetBugFunc = (function() {
 			if(this.scroller) {
+				console.log("bug");
 				var ht = this._scrollerOffset();
+				ht.left += "px";
+				ht.top += "px";
 				ht[_$.toPrefixStr("transform")] = _$.version >= 4 ? _$.getTranslate(0,0,this.option.use3d) : null;
 				ht[_$.toPrefixStr("transitionDuration")] = null;
 				_$.extend(this.scrollerStyle, ht);
@@ -373,15 +373,21 @@ _$.extend(mScroll.prototype, {
 	_end : function(e) {
 		// console.debug("end",e.moveType,e.duration, e.vectorX, e.vectorY);
 		this._clearTimer();
-
-		switch(e.moveType) {
-			case mTouch.HSCROLL:
-			case mTouch.VSCROLL:
-			case mTouch.DSCROLL:
-				this._endForScroll(e);
-				break;
-			default :
-				this._fixHighlight();
+		if(this.trigger("beforeEnd", e)) {
+			switch(e.moveType) {
+				case mTouch.HSCROLL:
+				case mTouch.VSCROLL:
+				case mTouch.DSCROLL:
+					this._endForScroll(e);
+					break;
+				default :
+					this._fixHighlight();
+			}
+			if(!this.trigger("end", e)) {
+				we.stop();
+			}
+		} else {
+			we.stop();
 		}
 		_$.hasClickBug && (this.scrollerStyle.pointerEvents = "auto");
 	},
@@ -412,8 +418,9 @@ _$.extend(mScroll.prototype, {
 		});
 	},
 
-
 	_transitionTime: function (duration) {
+		// @todo css 멈추는 방식 추가 구현 필요
+		// http://jindo.dev.naver.com/blog/2014/02/105
 		if(!this.option.useTransition) { return; }
 		duration += 'ms';
 		var durationStr = _$.toPrefixStr("transitionDuration");
@@ -484,10 +491,10 @@ _$.extend(mScroll.prototype, {
 
 		if(this.trigger("beforeScroll", param)) {
 			if(isMomentum) {
+				// correct position value
 				if(!this.option.useBounce) {
-					param.nextX = param.nextX;
-					param.nextY = param.nextY;
-					param.duration = param.duration;
+					param.nextX = this._boundaryX(param.nextX);
+					param.nextY = this._boundaryY(param.nextY);
 				}
 				this.scrollTo(param.nextX, param.nextY, param.duration);
 			} else {
@@ -505,12 +512,13 @@ _$.extend(mScroll.prototype, {
 	restore : function(duration) {
 		var nextX = this._boundaryX(this.x),
 			nextY = this._boundaryY(this.y);
+		this.isPlaying = false;
 		if(nextX === this.x && nextY == this.y) {
 			// end animation
-			return false;
+			this.trigger("scrollEnd");
+			this._fixOffsetBug();
 		} else {
 			this.scrollTo(nextX, nextY, duration);
-			return true;
 		}
 	},
 
@@ -527,7 +535,7 @@ _$.extend(mScroll.prototype, {
 			cancelAnimationFrame(this._timer["ani"]);
 			this._stopUpdater();
 		}
-		this._setPos(this._boundaryX(offset.left), this._boundaryY(offset.top));
+		this._setPos(offset.left, offset.top);
 		this.isPlaying = false;
 		// @todo isStop?
 		this.trigger("scrollEnd");
@@ -565,11 +573,7 @@ _$.extend(mScroll.prototype, {
 			if (now >= startTime + duration) {
 				self._stopUpdater();
 				self._setPos(x, y);
-				self.isPlaying = false;
-				if(!self.restore(300)) {
-					console.error("end");
-					self.trigger("scrollEnd");
-				}
+				self.restore(300);
 				return;
 			}
 			now = (now - startTime) / duration;
