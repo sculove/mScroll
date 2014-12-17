@@ -11,7 +11,7 @@ mScroll is multi-platform javascript scrolller.
 > This project is an unofficial project.  
 > No longer have any special requirements, the project will proceed unofficially.
 
-### mScroll Features
+### Features
 - cross platform and browsing in mobile environment. 
 - fast loading speed and optimal performance
 - separation of markup and code
