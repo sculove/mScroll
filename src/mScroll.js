@@ -131,7 +131,6 @@ _$.extend(mScroll.prototype, {
 		// bind offsetbug
 		_$.hasOffsetBug && (this._fixOffsetBugFunc = (function() {
 			if(this.scroller) {
-				console.log("bug");
 				var ht = this._scrollerOffset();
 				ht.left += "px";
 				ht.top += "px";
@@ -508,12 +507,11 @@ _$.extend(mScroll.prototype, {
 	restore : function(duration) {
 		var nextX = this._boundaryX(this.x),
 			nextY = this._boundaryY(this.y);
-		this.isPlaying = false;
 		if(nextX === this.x && nextY == this.y) {
 			// end animation
-			this.trigger("scrollEnd");
-			this._fixOffsetBug();
+			this._triggerScroll();
 		} else {
+			this.isPlaying = false;
 			this.scrollTo(nextX, nextY, duration);
 		}
 	},
@@ -526,15 +524,22 @@ _$.extend(mScroll.prototype, {
 		// 	this._hideScrollBar("H");
 		// }
 		if(this.option.useTransition) {
-			this._transitionTime(0);
+			// http://jindo.dev.naver.com/blog/2014/02/105
+			this._transitionTime(0.0001);
 		} else {
 			cancelAnimationFrame(this._timer["ani"]);
 			this._stopUpdater();
 		}
 		this._setPos(offset.left, offset.top);
-		this.isPlaying = false;
+		this.option.useTransition && this._transitionTime(0);
+
 		// @todo isStop?
-		this.trigger("scrollEnd");
+		this._triggerScroll();
+	},
+
+	_triggerScroll : function() {
+		this.isPlaying = false;
+		this.trigger("scroll");
 		this._fixOffsetBug();
 	},
 

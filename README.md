@@ -17,11 +17,53 @@ mScroll is multi-platform javascript scrolller.
 - separation of markup and code
 - dependency free
 
-## **How to install?**
+## How to install?
 To install mScroll as a front-end dependency using Bower, simply execute the following command in your project’s folder:
 ```bash
 bower install m-scroll
 ```
+
+## How to use
+
+### Configuring the mScroll
+mScroll can be configured by passing a second parameter during the initialization phase.
+```javascript
+var scroll = new mScroll('#wrapper', {
+    deceleration : 0.0005,
+    momentumDuration : 200,
+    effect : mEffect.cubicBezier(0.18, 0.35, 0.56, 1),
+    useHorizontal : false,
+    useVertical : true,
+    useDiagonalTouch : true,
+    useBounce : true,
+    useMomentum :  true,
+    use3d : true,
+    useTransition : false,
+    useScrollbar : true,
+    useFadeScrollbar : true
+});
+```
+
+### Custom Events
+mScroll also emits some useful custom events you can hook to.
+
+To register them you use the on(type, fn) method.
+```javascript
+scroll = new mScroll('#wrapper');
+scroll.on('scroll', functionSomething);
+```
+The above code executes the functionSomething function every time the content stops scrolling.
+
+The available types are:
+- beforeStart
+- start
+- beforeMove
+- move
+- beforeEnd
+- end
+- beforeScroll
+- scroll
+- position 
 
 ## **Issues**
 If you find a bug, please report us via the GitHub issues page.  
