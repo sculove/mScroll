@@ -5,18 +5,14 @@ mScroll.VSCROLLBAR_CLASS = "__scroll_for_Vscrollbar__";
 // constructor
 function mScroll(el, option) {
 	this.option = {
-		deceleration : 0.0005,
-		momentumDuration : _$.android ? 500 : 200,
-		effect : mEffect.cubicBezier(0.18, 0.35, 0.56, 1),
 		useHorizontal : false,
 		useVertical : true,
-		useDiagonalTouch : true,
 		useBounce : true,
-		useMomentum :  true,
 		use3d : _$.use3d,
 		useTransition : _$.useTransition,
 		useScrollbar : true,
-		useFadeScrollbar : true
+		deceleration : 0.0005,
+		effect : mEffect.cubicBezier(0.18, 0.35, 0.56, 1)
 	};
 	_$.extend(this.option, option);
 	this.wrapper = typeof el == "string" ? document.querySelector(el) : el;
@@ -298,14 +294,6 @@ _$.extend(mScroll.prototype, {
 				}
 			}
 			break;
-		case mTouch.DSCROLL :
-			if(this.option.useDiagonalTouch) {
-				e.preventDefault();
-				e.stopPropagation();
-			} else {
-				return;
-			}
-			break;
 		default :
 			e.preventDefault();
 			e.stopPropagation();
@@ -463,7 +451,7 @@ _$.extend(mScroll.prototype, {
 			y : this.y,
 			nextX : this.x,
 			nextY : this.y
-		}, isMomentum = e.shortestDuration <= this.option.momentumDuration;
+		}, isMomentum = e.shortestDuration <= (_$.android ? 500 : 200);
 
 		if(isMomentum) {
 			var speedX = 0, speedY = 0,

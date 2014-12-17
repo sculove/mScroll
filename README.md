@@ -29,18 +29,14 @@ bower install m-scroll
 mScroll can be configured by passing a second parameter during the initialization phase.
 ```javascript
 var scroll = new mScroll('#wrapper', {
-    deceleration : 0.0005,
-    momentumDuration : 200,
-    effect : mEffect.cubicBezier(0.18, 0.35, 0.56, 1),
     useHorizontal : false,
     useVertical : true,
-    useDiagonalTouch : true,
     useBounce : true,
-    useMomentum :  true,
     use3d : true,
     useTransition : false,
     useScrollbar : true,
-    useFadeScrollbar : true
+    deceleration : 0.0005,
+    effect : mEffect.cubicBezier(0.18, 0.35, 0.56, 1)
 });
 ```
 
