@@ -19,10 +19,6 @@ function mScroll(el, option) {
 		useFadeScrollbar : true
 	};
 	_$.extend(this.option, option);
-
-	// tempory option
-	this.option.useTransition = true;
-
 	this.wrapper = typeof el == "string" ? document.querySelector(el) : el;
 	this._init();
 	this.refresh();
