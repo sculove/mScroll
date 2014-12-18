@@ -296,7 +296,6 @@ _$.extend(mScroll.prototype, {
 			}
 			break;
 		default :
-			console.log("11");
 			e.preventDefault();
 			e.stopPropagation();
 		}
@@ -344,7 +343,7 @@ _$.extend(mScroll.prototype, {
 				nextX = this._boundaryX(this.x + e.vectorX);
 				nextY = this._boundaryY(this.y + e.vectorY);
 			}
-			this._setPos(nextX, nextY);
+			(nextX != this.x || nextY != this.x ) && this._setPos(nextX, nextY);
 			if(!this.trigger("move", e)) {
 				e.stop();
 			}
@@ -468,19 +467,20 @@ _$.extend(mScroll.prototype, {
 				nextY = this._getMomentum(-e.shortestDistanceY, speedY, this.wrapperH, -this.y, -this.maxScrollY + this.y);
 				param.nextY = this.y + nextY.distance;
 			}
-			param.duration = Math.max(Math.max(nextX.duration, nextY.duration),10);
+			param.duration = Math.max(nextX.duration, nextY.duration);
+			param.duration = param.duration < 10 ? 0 : param.duration;
 			// console.info(param.y , "=>", param.nextY, "(", param.duration, ")");
 		} else {
 			param.duration = 0;
 		}
 
+		if(!this.option.useBounce) {
+			param.nextX = this._boundaryX(param.nextX);
+			param.nextY = this._boundaryY(param.nextY);
+		}
 		if(this.trigger("beforeScroll", param)) {
-			if(isMomentum) {
+			if(!!param.duration) {
 				// correct position value
-				if(!this.option.useBounce) {
-					param.nextX = this._boundaryX(param.nextX);
-					param.nextY = this._boundaryY(param.nextY);
-				}
 				this.scrollTo(param.nextX, param.nextY, param.duration);
 			} else {
 				// out of range
@@ -488,7 +488,10 @@ _$.extend(mScroll.prototype, {
 				   (this.useVScroll &&  ( param.nextY > 0  || param.nextY  < this.maxScrollY)) ) {
 					this.restore(300);
 				} else {
-					this._setPos(param.nextX, param.nextY);
+					if(param.nextX != this.x || param.nextY != this.y) {
+
+						this._setPos(param.nextX, param.nextY);
+					}
 				}
 			}
 		}
