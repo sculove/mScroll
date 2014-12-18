@@ -33,6 +33,7 @@ _$.extend(mScroll.prototype, {
 		};
 		this.isPlaying = false;
 		this._bufferPos = { x : 0, y : 0};
+		this._momentumDuration = _$.android ? 500 : 200;
 		this.x = 0;
 		this.y = 0;
 
@@ -295,6 +296,7 @@ _$.extend(mScroll.prototype, {
 			}
 			break;
 		default :
+			console.log("11");
 			e.preventDefault();
 			e.stopPropagation();
 		}
@@ -451,7 +453,7 @@ _$.extend(mScroll.prototype, {
 			y : this.y,
 			nextX : this.x,
 			nextY : this.y
-		}, isMomentum = e.shortestDuration <= (_$.android ? 500 : 200);
+		}, isMomentum = e.shortestDuration <= this._momentumDuration;
 
 		if(isMomentum) {
 			var speedX = 0, speedY = 0,
@@ -608,7 +610,7 @@ _$.extend(mScroll.prototype, {
 			nextDist = max;
 		}
 		nextDist = nextDist * (distance > 0 ? -1 : 1);
-		nextDuration = (speed / deceleration) - this.option.momentumDuration;
+		nextDuration = (speed / deceleration) - this._momentumDuration;
 		nextDuration = nextDuration < 0 ? 0 : nextDuration;
 		return {
 			distance: nextDist,
